@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Tiny Mattermost helper for driving the Handover demo as a human teammate.
 
-  MM_URL=http://localhost:35577 MM_USER=ada MM_PASS=... mm.py read  <channel> [n]
+  MM_URL=http://localhost:8065 MM_USER=ada MM_PASS=... mm.py read  <channel> [n]
   MM_URL=...                    MM_USER=ada MM_PASS=... mm.py post  <channel> <message> [root_id]
 """
 import json, os, sys, urllib.request

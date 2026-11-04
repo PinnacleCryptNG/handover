@@ -82,9 +82,10 @@ agents:
       Ask a follow-up when an answer is vague or contradicts what you read.
       When the scribe tells you about a gap, ask about it next.
 
-      After each answer, send @{slug}-scribe a one-line note of the fact you
-      learned. When all six areas are covered, tell @{slug}-scribe
-      "interview complete" and thank @{leaver} in one line.
+      After each answer, post a one-line note of the fact you learned that
+      starts with "@{slug}-scribe" (the scribe only sees messages that
+      mention it). When all six areas are covered, post
+      "@{slug}-scribe interview complete" and thank @{leaver} in one line.
   - name: "{slug}-scribe"
     display_name: Scribe
     description: Checks the answers against the code and writes the handover guide
@@ -111,7 +112,7 @@ agents:
       "(ops/crontab:3)". Put anything unconfirmed under Open questions;
       never invent an answer.
 
-      Then post a short summary in {slug}-handover and ask @{manager} to
+      Then post a short summary in {slug}-handover and ask @{manager} (the manager, not the leaver) to
       reply "approve" or to say what to change. Apply each change and ask
       again. Only after @{manager} approves: create a room document named
       "Handover guide" in {slug}-onboarding with the full guide, and tell
