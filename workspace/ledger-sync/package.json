@@ -1,0 +1,1 @@
+{ "name": "ledger-sync", "version": "1.4.2", "private": true, "scripts": { "sync": "node src/run.js" } }

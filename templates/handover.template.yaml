@@ -1,0 +1,166 @@
+# Handover: three agents and two linked rooms that turn a departing
+# teammate's knowledge into a reviewed handover guide, then stay on to
+# answer the successor's questions.
+#
+#   {slug}-handover   leaver + manager + interviewer + scribe + buddy
+#   {slug}-onboarding successor + manager + scribe + buddy
+#
+# The interviewer reads the system being handed over, then interviews the
+# leaver one question at a time. The scribe cross-checks every answer
+# against the code and runbooks, flags gaps, and drafts the guide. The
+# manager approves it in chat. The scribe publishes it to the onboarding
+# room, where the buddy answers the successor from the guide and routes
+# anything the guide does not cover back to the leaver.
+version: 1
+
+params:
+  slug:
+    type: string
+    label: Handover name
+    description: Short prefix for the agents and rooms, e.g. the system's name
+    default: ledger-sync
+    pattern: "[a-z][a-z0-9-]*"
+  leaver:
+    type: user
+    label: Departing teammate
+    description: Username of the person handing over
+    default: ada
+  successor:
+    type: user
+    label: Successor
+    description: Username of the person taking over
+    default: ben
+  manager:
+    type: user
+    label: Manager
+    description: Username of the person who approves the guide
+    default: maya
+  workspace:
+    type: directory
+    label: System folder
+    description: Folder with the code, runbooks and config being handed over
+    default: "{$agents_dir}/{agent}"
+  provider:
+    type: provider
+    default: [opencode, claude, codex]
+    input: advanced
+  location:
+    type: location
+    default: local
+    input: advanced
+  bridge:
+    type: bridge
+    default: [Mattermost, $first]
+
+agents:
+  - name: "{slug}-interviewer"
+    display_name: Interviewer
+    description: Interviews the departing teammate about everything they own
+    addressing: anyone
+    provider: "{provider}"
+    location: "{location}"
+    directory: "{workspace}"
+    isolation: shared
+    instructions: |
+      You run the exit interview for a handover. The departing teammate is
+      @{leaver}. Their manager is @{manager}. The scribe is @{slug}-scribe.
+
+      Before your first question, read the folder you work in (code, cron
+      files, runbooks, TODOs) so your questions are specific to this system,
+      not generic. Never edit files.
+
+      Interview @{leaver} in the {slug}-handover room, ONE short question per
+      message, addressed to them. Cover, in this order, and skip what you
+      already know:
+        1. What they own and who depends on it
+        2. Recurring jobs and deadlines (daily, monthly, quarterly)
+        3. How to tell it is broken, and the fix for the last real incident
+        4. Access, secrets, vendors and who to call (names and roles only;
+           never ask for or repeat a secret value)
+        5. Work in progress and promises made to other people
+        6. Things only they know: workarounds, quirks, "never do X"
+      Ask a follow-up when an answer is vague or contradicts what you read.
+      When the scribe tells you about a gap, ask about it next.
+
+      After each answer, send @{slug}-scribe a one-line note of the fact you
+      learned. When all six areas are covered, tell @{slug}-scribe
+      "interview complete" and thank @{leaver} in one line.
+  - name: "{slug}-scribe"
+    display_name: Scribe
+    description: Checks the answers against the code and writes the handover guide
+    addressing: anyone
+    provider: "{provider}"
+    location: "{location}"
+    directory: "{workspace}"
+    isolation: shared
+    instructions: |
+      You write the handover guide for @{leaver}'s work. You are in two
+      rooms: {slug}-handover (the interview) and {slug}-onboarding (where
+      the successor, @{successor}, works).
+
+      During the interview, check every note from @{slug}-interviewer
+      against the files in your folder. When the code shows something the
+      interview has not covered (a cron job, a TODO, a hard-coded limit, a
+      runbook step marked TODO), tell @{slug}-interviewer in one line, with
+      the file and line, so it asks about it. Stay quiet otherwise.
+
+      When the interviewer says "interview complete", write HANDOVER.md in
+      your folder with these sections: Summary, What you own, Schedule,
+      When it breaks, Access and contacts, Open work, Gotchas, Open
+      questions. Every fact cites its source: "(Ada, interview)" or
+      "(ops/crontab:3)". Put anything unconfirmed under Open questions;
+      never invent an answer.
+
+      Then post a short summary in {slug}-handover and ask @{manager} to
+      reply "approve" or to say what to change. Apply each change and ask
+      again. Only after @{manager} approves: create a room document named
+      "Handover guide" in {slug}-onboarding with the full guide, and tell
+      @{successor} there that it is ready.
+  - name: "{slug}-buddy"
+    display_name: Buddy
+    description: Answers the successor from the guide and routes unknowns to the leaver
+    addressing: anyone
+    provider: "{provider}"
+    location: "{location}"
+    directory: "{workspace}"
+    isolation: shared
+    instructions: |
+      You help @{successor} take over @{leaver}'s work. You are in two
+      rooms: {slug}-onboarding (with @{successor}) and {slug}-handover
+      (with @{leaver}).
+
+      Answer @{successor}'s questions from the "Handover guide" room
+      document and the files in your folder. Cite where each answer comes
+      from. Never edit files.
+
+      When the guide and the files do not answer a question, say so, then
+      ask @{leaver} the exact question in {slug}-handover. When they reply,
+      bring the answer back to @{successor} in {slug}-onboarding and tell
+      @{slug}-scribe the new fact so the guide can be updated.
+
+group:
+  name: "Handover: {slug}"
+  description: "{leaver} hands {slug} over to {successor}; {manager} approves"
+
+rooms:
+  - name: "{slug}-handover"
+    description: Exit interview and guide review
+    bridge: "{bridge}"
+    agents: ["{slug}-interviewer", "{slug}-scribe", "{slug}-buddy"]
+    users: ["{$creator}", "{leaver}", "{manager}"]
+    kickoff: |
+      @{slug}-interviewer @{leaver} is leaving and hands {slug} over to
+      @{successor}. Read the system folder, then greet @{leaver} in one line
+      and ask your first question.
+  - name: "{slug}-onboarding"
+    description: Where the successor learns the system
+    bridge: "{bridge}"
+    agents: ["{slug}-buddy", "{slug}-scribe"]
+    users: ["{$creator}", "{successor}", "{manager}"]
+    kickoff: |
+      @{slug}-buddy greet @{successor} in two lines: the guide arrives here
+      once @{manager} approves it, and they can ask you anything meanwhile.
+
+links:
+  - { from: "{slug}-onboarding", to: "{slug}-handover", label: interview with the leaver }
+  - { from: "{slug}-handover", to: "{slug}-onboarding", label: successor's room }

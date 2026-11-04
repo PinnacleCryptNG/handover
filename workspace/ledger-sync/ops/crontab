@@ -1,0 +1,3 @@
+# m h dom mon dow  command
+15 2 * * *  node /srv/ledger-sync/src/run.js --date yesterday
+0  6 1 * *  node /srv/ledger-sync/src/month-end-report.js   # finance reads this on the 1st
