@@ -67,6 +67,15 @@ You need [Switch Console](https://github.com/sandbox-quantum/switch/releases) an
 [`scripts/mm.py`](scripts/mm.py) posts and reads messages as a given user through the
 Mattermost API, which is handy for replaying the demo.
 
+## See a real run
+
+- [`examples/transcript.md`](examples/transcript.md): every message from both rooms, from the
+  first question to the Buddy routing Ben's question back to Ada.
+- [`examples/HANDOVER.md`](examples/HANDOVER.md): the guide the Scribe wrote, after Maya's
+  changes and the fact the Buddy brought back.
+
+Check the template after editing it: `python3 scripts/check_template.py` (needs PyYAML).
+
 ## Sample system
 
 [`workspace/ledger-sync`](workspace/ledger-sync) is a small, made-up nightly payments sync

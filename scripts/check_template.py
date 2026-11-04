@@ -10,7 +10,7 @@ import yaml
 path = Path(sys.argv[1] if len(sys.argv) > 1 else "templates/handover.template.yaml")
 t = yaml.safe_load(path.read_text())
 errors = []
-params = set(t.get("params", {})) | {"$creator"}
+params = set(t.get("params", {})) | {"$creator", "$creator_email", "$agents_dir", "$date", "$timestamp", "agent"}
 
 agents = {a["name"] for a in t["agents"]}
 rooms = {r["name"] for r in t["rooms"]}
