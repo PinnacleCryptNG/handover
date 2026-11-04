@@ -1,5 +1,7 @@
 # Handover: I made three AI agents run an exit interview in team chat
 
+![Handover cover](https://raw.githubusercontent.com/PinnacleCryptNG/handover/main/docs/img/cover.png)
+
 When someone leaves a team, the things they know usually leave with them. You find out
 three weeks later, when a cron job fails at 2 a.m. and the only person who knew the fix is
 gone. The runbook says "TODO".
