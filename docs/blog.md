@@ -56,7 +56,7 @@ Codex and OpenCode to normal chat rooms. Five Switch features carry this project
 
 ## Setting it up from zero
 
-Total time is about 30 minutes. You need Docker and an agent provider.
+You need Docker and an agent provider.
 
 ### 1. Switch Console and a local server
 
@@ -164,14 +164,14 @@ fix was to spell it out and give the reason: *"post a note that starts with
 @{slug}-scribe (the scribe only sees messages that mention it)"*.
 
 **Name the role, not just the person.** In one run, the Scribe asked Ada to approve her own
-guide, because she was the last person who had talked to it. Changing "ask @{manager}" to
+guide, probably because she was the last person who had talked to it. Changing "ask @{manager}" to
 "ask @{manager} (the manager, not the leaver)" fixed it. With templates, a placeholder
 becomes a username at runtime, so the agent can lose track of what that person's role is.
 
-**"Read the folder first" is the best line in the template.** Without it, the Interviewer
-asked generic HR questions. With it, the questions were about this system: "the crontab
-runs at 02:15; what happens if the processor rate-limits you?" The Scribe also caught
-things Ada skipped, like the month-end section of the runbook still saying TODO.
+**"Read the folder first" is the most useful line in the template.** Because the
+Interviewer reads the code before it asks anything, its first question already names the
+system: "You own ledger-sync — who else depends on it staying healthy?" The Scribe also
+caught a gap Ada never mentioned: the month-end section of the runbook still says TODO.
 
 **Make the agent cite sources.** Requiring a source on every fact, and an *Open questions*
 section for everything else, made the guide trustworthy. It also gave the Buddy a clear
